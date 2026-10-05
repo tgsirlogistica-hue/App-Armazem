@@ -1,10 +1,10 @@
 const $=id=>document.getElementById(id), KEY='tgr-contagem-v1';
 let registros=[],tipo='estoque',atual=null;
-$('codigo').oninput=()=>{atual=null;$('produto').hidden=true;$('erro').textContent=''};
+$('codigo').oninput=()=>{atual=null;$('produto').hidden=true;$('erro').textContent='';const codigo=$('codigo').value.trim(),p=PRODUTOS[codigo];$('previaNome').textContent=p?p.nome:codigo?'Digite o código completo para identificar o produto.':'';};
 try{registros=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(registros))registros=[]}catch(e){$('aviso').textContent='Não foi possível recuperar o rascunho. Exporte a contagem antes de sair.'}
 function persistir(){try{localStorage.setItem(KEY,JSON.stringify(registros));return true}catch(e){$('aviso').textContent='Não foi possível salvar neste aparelho. Baixe o CSV antes de fechar a página.';return false}}
 function tela(id){['inicio','contar','salvar'].forEach(x=>$(x).hidden=x!==id);$('status').textContent=registros.length+' registros nesta contagem';window.scrollTo(0,0)}
-function abrir(t){tipo=t;atual=null;$('titulo').textContent=t==='estoque'?'Contagem de estoque':'Contagem de avarias';$('codigo').value='';$('produto').hidden=true;$('erro').textContent='';$('aviso').textContent='';tela('contar');$('codigo').focus()}
+function abrir(t){tipo=t;atual=null;$('titulo').textContent=t==='estoque'?'Contagem de estoque':'Contagem de avarias';$('codigo').value='';$('previaNome').textContent='';$('produto').hidden=true;$('erro').textContent='';$('aviso').textContent='';tela('contar');$('codigo').focus()}
 $('busca').onsubmit=e=>{e.preventDefault();const codigo=$('codigo').value.trim();atual=PRODUTOS[codigo];$('produto').hidden=!atual;$('erro').textContent=atual?'':'Código não encontrado na base.';if(!atual)return;$('codExibido').textContent='CÓDIGO '+codigo;$('nome').textContent=atual.nome;[['emb','embalagem'],['porPalete','palete'],['porLastro','lastro']].forEach(([id,k])=>$(id).textContent=atual[k]>0?atual[k]:'Não informado');['palete','lastro','caixa'].forEach(id=>{$(id).value=0;$(id).disabled=id!=='caixa'&&!(atual[id]>0)});$('observacao').value='';if(!(atual.palete>0)||!(atual.lastro>0))$('erro').textContent='Conversões ausentes na base: conte em caixas ou utilize apenas o campo com conversão informada.';calcular()};
 function calcular(){const total=['palete','lastro','caixa'].reduce((s,k)=>s+Number($(k).value||0)*(k==='caixa'?1:Number(atual?.[k]||0)),0);$('total').textContent=total.toLocaleString('pt-BR');return total}
 ['palete','lastro','caixa'].forEach(k=>$(k).oninput=calcular);
