@@ -19,6 +19,7 @@ function doPost(e){
   if(!e.parameter.payload||e.parameter.payload.length>1000000)throw Error('Envio muito grande');
   p=JSON.parse(e.parameter.payload);res.nonce=texto_(p.nonce,100);
   if(!/^https:\/\/[a-zA-Z0-9.-]+(?::\d+)?$/.test(p.origin))throw Error('Origem inválida');
+  if(p.acao==='recebimento')return salvarRecebimento_(p);
   const responsavel=texto_(p.responsavel,100);if(!responsavel.trim())throw Error('Informe o responsável');
   if(!Array.isArray(p.registros)||!p.registros.length||p.registros.length>2000)throw Error('Lote inválido');
   const rows=p.registros.map(r=>{
@@ -78,3 +79,33 @@ function atualizarFarolInterno_(){
  ss.setActiveSheet(s);ss.moveActiveSheet(1);SpreadsheetApp.flush();
 }
 function onOpen(){SpreadsheetApp.getUi().createMenu('Contagem TGR').addItem('Atualizar farol','atualizarFarol').addToUi();}
+const RC_CABECALHO=['ID recebimento','ID produto','NF','Data emissão','Origem','Placa carreta','Placa cavalo','Data recebimento','Horário descarregamento','Turno','Conferente','Motorista','Chapatex total descarga','Paletes madeira total descarga','Código produto','Produto','Validade','Paletes completos','Lastros adicionais','Caixas soltas','Total caixas','Paletes físicos','Etiquetas por palete','Total etiquetas','Registrado em'];
+function prepararRecebimentos(){
+ const ss=SpreadsheetApp.openById(PLANILHA_ID),s=ss.getSheetByName('RECEBIMENTOS')||ss.insertSheet('RECEBIMENTOS');
+ if(!s.getLastRow()){s.appendRow(RC_CABECALHO);s.setFrozenRows(1);s.getRange(1,1,1,RC_CABECALHO.length).setFontWeight('bold').setBackground('#cc1726').setFontColor('#ffffff');}
+ if(JSON.stringify(s.getRange(1,1,1,RC_CABECALHO.length).getValues()[0])!==JSON.stringify(RC_CABECALHO))throw Error('Cabeçalho de RECEBIMENTOS incompatível.');return s;
+}
+function rcDataValida_(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)||isNaN(new Date(s+'T12:00:00Z').getTime())||new Date(s+'T12:00:00Z').toISOString().slice(0,10)!==s)throw Error('Data inválida');return s;}
+function montarRecebimento_(r){
+ if(!r||!Array.isArray(r.itens)||!r.itens.length||r.itens.length>1000)throw Error('Lista de produtos inválida');
+ const id=texto_(r.id,100),d=r.dados;if(!id||!d)throw Error('Recebimento sem identificação');
+ ['NF','Origem','Carreta','Cavalo','Conferente','Motorista'].forEach(k=>{if(typeof d[k]!=='string'||!d[k].trim())throw Error('Preencha '+k);});
+ const lados=inteiro_(Number(d.Lados));if(lados<1||lados>3)throw Error('Escolha de 1 a 3 lados');
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.Hora)||!['Manhã','Tarde','Noite'].includes(d.Turno))throw Error('Horário ou turno inválido');
+ const gerais=[id,null,texto_(d.NF,50),rcDataValida_(d.Emissao),texto_(d.Origem,150),texto_(d.Carreta,12),texto_(d.Cavalo,12),rcDataValida_(d.Data),d.Hora,d.Turno,texto_(d.Conferente,100),texto_(d.Motorista,100),inteiro_(Number(d.Chapatex)),inteiro_(Number(d.Madeira))];
+ const ids=new Set();return r.itens.map(i=>{
+  const itemId=texto_(i.id,100);if(!itemId||ids.has(itemId))throw Error('Produto duplicado no envio');ids.add(itemId);
+  const pal=inteiro_(i.palete),las=inteiro_(i.lastro),cx=inteiro_(i.caixa),pp=inteiro_(i.porPalete),pl=inteiro_(i.porLastro),fisicos=inteiro_(i.fisicos);
+  if((pal&&!pp)||(las&&!pl)||fisicos<1||fisicos>1000)throw Error('Conversão ou quantidade de paletes inválida');
+  const total=inteiro_(pal*pp+las*pl+cx);if(total<1||total!==i.total)throw Error('Total de caixas inconsistente');
+  const row=[...gerais,texto_(i.codigo,50),texto_(i.nome,250),rcDataValida_(i.validade),pal,las,cx,total,fisicos,lados,fisicos*lados,new Date()];row[1]=itemId;return row;
+ });
+}
+function salvarRecebimento_(p){
+ const res={tipo:'tgr-recebimento',nonce:p.nonce,ok:false};
+ try{const rows=montarRecebimento_(p.recebimento),lock=LockService.getScriptLock();lock.waitLock(30000);
+  try{const s=prepararRecebimentos(),existentes=s.getLastRow()>1?s.getRange(2,1,s.getLastRow()-1,2).getValues():[],ids=new Set(existentes.map(r=>r[0]+'|'+r[1]));const novos=rows.filter(r=>!ids.has(r[0]+'|'+r[1]));if(novos.length)s.getRange(s.getLastRow()+1,1,novos.length,RC_CABECALHO.length).setValues(novos);SpreadsheetApp.flush();res.ok=true;res.id=p.recebimento.id;}finally{lock.releaseLock()}
+ }catch(e){res.erro=String(e.message||e).slice(0,300)}
+ const json=JSON.stringify(res).replace(/</g,'\\u003c'),origin=JSON.stringify(p.origin);
+ return HtmlService.createHtmlOutput('<!doctype html><html><body><p>'+(res.ok?'Recebimento salvo.':'Recebimento não confirmado.')+'</p><script>const r='+json+';window.parent.postMessage(r,'+origin+');window.top.postMessage(r,'+origin+');</script></body></html>').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
