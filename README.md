@@ -9,7 +9,7 @@ Para ativar o salvamento na planilha Google, siga primeiro **ATIVAR_GOOGLE.md**.
 4. O GitHub mostrará o endereço publicado quando a implantação terminar.
 
 ## Uso
-Abra Contagem de estoque ou Contagem de avarias. Pesquise o código, informe paletes completos, lastros adicionais e caixas soltas, e salve cada produto. O total é paletes × caixas por palete + lastros × caixas por lastro + caixas soltas. Registros repetidos são lançamentos adicionais e entram na soma. Zero é aceito para documentar produto sem estoque.
+Abra Contagem de estoque ou Contagem de avarias. Pesquise o código, informe paletes completos, lastros adicionais e caixas soltas, e salve cada produto. O total é paletes × caixas por palete + lastros × caixas por lastro + caixas soltas. Cada novo lançamento entra na soma diária do produto no FAROL. Reenviar o mesmo registro não o duplica. Zero é aceito para documentar produto sem estoque.
 
 Salvar contagem abre a revisão e baixa um CSV compatível com Excel. O rascunho usa o navegador do aparelho. O botão Salvar na planilha Google envia registros à aba CONTAGENS depois da ativação descrita em ATIVAR_GOOGLE.md. Não há gravação das contagens no GitHub nem leitura automática de contagens de outros aparelhos. Exporte antes de limpar os dados do navegador. Excluir um registro ou iniciar nova contagem pede confirmação.
 
