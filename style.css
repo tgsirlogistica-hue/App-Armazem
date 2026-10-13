@@ -10,3 +10,5 @@ fieldset{border:0;padding:0;margin:0;min-width:0}select{display:block;width:100%
 #inicio .atividade-figura{width:64px;height:64px;flex:0 0 64px}#inicio .menu .finalizar-contagem{background:#187044;color:#fff;border-color:#187044;box-shadow:0 3px 8px #18704420}#inicio .finalizar-contagem:focus-visible{outline-color:#1267ba}@media(max-width:550px){#inicio .atividade-figura{width:54px;height:54px;flex-basis:54px}#inicio .menu button{gap:18px}}
 
 .logo-inicial{background:#fff;border:1px solid #d9e0e6;border-radius:14px;padding:18px 24px;margin-bottom:28px;text-align:center}.logo-inicial img{display:block;width:min(100%,440px);height:auto;margin:auto}#atividades .atividade-figura{width:64px;height:64px;flex:0 0 64px}@media(max-width:550px){.logo-inicial{padding:16px;margin-bottom:24px}#atividades .atividade-figura{width:54px;height:54px;flex-basis:54px}#atividades .menu button{gap:18px}}
+
+#conferencia .atividade-figura{width:64px;height:64px;flex:0 0 64px}@media(max-width:550px){#conferencia .atividade-figura{width:54px;height:54px;flex-basis:54px}#conferencia .menu button{gap:18px}}
