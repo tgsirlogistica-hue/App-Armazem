@@ -6,3 +6,5 @@
 header .titulo-armazem{font-size:clamp(1.4rem,4vw,2rem);line-height:1.3}.menu button span{overflow-wrap:anywhere}
 
 fieldset{border:0;padding:0;margin:0;min-width:0}select{display:block;width:100%;font:inherit;padding:15px;border:1px solid #bcc7d1;border-radius:8px;margin-top:8px;background:white}#rcAviso{font-weight:bold;line-height:1.5}
+
+#inicio .atividade-figura{width:64px;height:64px;flex:0 0 64px}#inicio .menu .finalizar-contagem{background:#187044;color:#fff;border-color:#187044;box-shadow:0 3px 8px #18704420}#inicio .finalizar-contagem:focus-visible{outline-color:#1267ba}@media(max-width:550px){#inicio .atividade-figura{width:54px;height:54px;flex-basis:54px}#inicio .menu button{gap:18px}}
