@@ -3,7 +3,7 @@ function enviarGoogle(){
  if(envioPendente)return;
  if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(GOOGLE_SCRIPT_URL)){alert('Configure a URL do Apps Script no arquivo config.js.');return}
  const responsavel=$('responsavel').value.trim();if(!responsavel){$('responsavel').focus();alert('Informe o responsável.');return}
- const pendentes=registros.filter(r=>!r.enviado);if(!pendentes.length){$('aviso').textContent='Não há registros pendentes de envio.';return}
+ const pendentes=registrosDaAtividade().filter(r=>!r.enviado);if(!pendentes.length){$('aviso').textContent='Não há registros pendentes de envio.';return}
  if(location.protocol!=='https:'&&location.hostname!=='localhost'){alert('Abra o endereço publicado no GitHub para enviar à planilha.');return}
  const nonce=crypto.randomUUID(),frame=document.createElement('iframe');frame.name='envio_'+nonce;frame.hidden=true;document.body.append(frame);
  const form=document.createElement('form');form.method='POST';form.action=GOOGLE_SCRIPT_URL;form.target=frame.name;
